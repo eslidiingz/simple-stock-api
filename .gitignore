@@ -30,6 +30,10 @@ yarn-error.log*
 .env.test.local
 .env.production.local
 
+# local data files
+/data
+/public/uploads
+
 # vercel
 .vercel
 
