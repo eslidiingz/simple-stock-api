@@ -1,0 +1,102 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         String    @id @default(uuid())
+  first_name String?
+  last_name  String?
+  username   String
+  password   String
+  email      String
+  is_active  Boolean   @default(true)
+  created_at DateTime  @default(now())
+  updated_at DateTime  @default(now())
+  deleted_at DateTime?
+
+  @@unique([username, email])
+  @@index([first_name, username, email])
+  @@map("users")
+}
+
+model Category {
+  id         String    @id @default(uuid())
+  name       String
+  is_active  Boolean   @default(true)
+  created_at DateTime  @default(now())
+  updated_at DateTime  @default(now())
+  deleted_at DateTime?
+  products   Product[]
+
+  @@index([id])
+  @@map("product_categories")
+}
+
+model Product {
+  id          String    @id @default(uuid())
+  category_id String
+  code        String    @unique
+  name        String
+  description String?
+  image       String?
+  thumbnail   String?
+  price       Decimal
+  stock       Int       @default(0)
+  is_active   Boolean   @default(true)
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @default(now())
+  deleted_at  DateTime?
+
+  category        Category        @relation(fields: [category_id], references: [id])
+  stock_movements StockMovement[]
+
+  @@index([id])
+  @@map("products")
+}
+
+model StockMovement {
+  id            String       @id @default(uuid())
+  product_id    String
+  quantity      Int
+  movement_type MovementType
+  reference     String?
+  created_at    DateTime     @default(now())
+
+  product Product @relation(fields: [product_id], references: [id])
+
+  @@index([id])
+  @@map("stock_movements")
+}
+
+model Transaction {
+  id               String          @id @default(uuid())
+  transaction_type TransactionType
+  amount           Int
+  created_at       DateTime        @default(now())
+
+  @@index([id])
+  @@map("transactions")
+}
+
+enum MovementType {
+  stock_in
+  stock_out
+  adjustment
+}
+
+enum TransactionType {
+  purchase
+  sale
+  adjustment
+}
