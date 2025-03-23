@@ -12,9 +12,15 @@ prisma.$use(async (params, next) => {
     params.action = 'update'
     params.args.data = { deleted_at: new Date() }
   } else if (params.action === 'findMany' || params.action === 'findUnique') {
-    params.args.where.deleted_at = null
+
+    if (params.model !== 'StockMovement') {
+      params.args.where.deleted_at = null
+    }
+
   } else if (params.action === 'count') {
-    params.args.where.deleted_at = null
+    if (params.model !== 'StockMovement') {
+      params.args.where.deleted_at = null
+    }
   }
 
   return next(params)

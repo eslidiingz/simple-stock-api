@@ -90,16 +90,11 @@ export const authController = new Elysia({ prefix: '/auth' })
     }
   })
 
-  .state({
-    currentUser: {}
-  })
+  // .state({
+  //   currentUser: {}
+  // })
 
   .guard({
-    // headers: t.Object({
-    //   authorization: t.String({
-    //     pattern: '^Bearer .+$'
-    //   })
-    // }),
     beforeHandle: async ({ bearer, jwt, error, store }) => {
       const profile = await jwt.verify(bearer || '')
 

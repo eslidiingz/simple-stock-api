@@ -5,6 +5,22 @@ CREATE TYPE "MovementType" AS ENUM ('stock_in', 'stock_out', 'adjustment');
 CREATE TYPE "TransactionType" AS ENUM ('purchase', 'sale', 'adjustment');
 
 -- CreateTable
+CREATE TABLE "users" (
+    "id" TEXT NOT NULL,
+    "first_name" TEXT,
+    "last_name" TEXT,
+    "username" TEXT NOT NULL,
+    "password" TEXT NOT NULL,
+    "email" TEXT NOT NULL,
+    "is_active" BOOLEAN NOT NULL DEFAULT true,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "deleted_at" TIMESTAMP(3),
+
+    CONSTRAINT "users_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "product_categories" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
@@ -56,6 +72,12 @@ CREATE TABLE "transactions" (
 
     CONSTRAINT "transactions_pkey" PRIMARY KEY ("id")
 );
+
+-- CreateIndex
+CREATE INDEX "users_first_name_username_email_idx" ON "users"("first_name", "username", "email");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "users_username_email_key" ON "users"("username", "email");
 
 -- CreateIndex
 CREATE INDEX "product_categories_id_idx" ON "product_categories"("id");

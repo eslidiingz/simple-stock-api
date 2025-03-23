@@ -6,6 +6,8 @@ import { productController } from "./products/product.controller";
 import { productCategoryController } from "./product-categories/product-category.controller";
 import { authController } from "./auth/auth.controller";
 import jwt from "@elysiajs/jwt";
+import { StatusCodes } from "http-status-codes";
+import { stockMovementController } from "./stock-movements/stock-movement.controller";
 
 const app = new Elysia()
   .use(swagger())
@@ -16,13 +18,46 @@ const app = new Elysia()
   }))
   .use(jwt({
     name: 'jwt',
-    secret: process.env.JWT_SECRET as string
+    // biome-ignore lint/style/noNonNullAssertion: <explanation>
+    secret: process.env.JWT_SECRET!,
+    exp: '1h'
   }))
-  .group('/api', (app) => app.use([
-    authController,
-    productCategoryController,
-    productController
-  ]))
+  .state({
+    currentUser: {}
+  })
+  .group('/api', (app) => {
+
+    app
+      .use(authController)
+      .derive(({ headers }) => {
+        const auth = headers.authorization
+
+        return {
+          bearer: auth?.startsWith('Bearer ')
+            ? auth.slice(7)
+            : null
+        }
+      })
+      .guard({
+        beforeHandle: async ({ bearer, jwt, error, store }) => {
+          const profile = await jwt.verify(bearer || '')
+
+          if (!profile)
+            return error(StatusCodes.UNAUTHORIZED, {
+              message: 'Unauthorized'
+            })
+
+          store.currentUser = profile
+        }
+      })
+      .use([
+        productCategoryController,
+        productController,
+        stockMovementController,
+      ])
+
+    return app
+  })
 
 
   // .onError(({ error, code }) => {

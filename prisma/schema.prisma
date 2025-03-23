@@ -30,7 +30,7 @@ model User {
   @@map("users")
 }
 
-model Category {
+model ProductCategory {
   id         String    @id @default(uuid())
   name       String
   is_active  Boolean   @default(true)
@@ -58,7 +58,7 @@ model Product {
   updated_at  DateTime  @default(now())
   deleted_at  DateTime?
 
-  category        Category        @relation(fields: [category_id], references: [id])
+  category        ProductCategory @relation(fields: [category_id], references: [id])
   stock_movements StockMovement[]
 
   @@index([id])

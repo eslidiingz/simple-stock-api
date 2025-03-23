@@ -39,7 +39,7 @@ export class ProductCategory {
     }
 
     const [data, total] = await Promise.all([
-      prisma.category.findMany({
+      prisma.productCategory.findMany({
         where,
         include: {
           _count: {
@@ -54,14 +54,14 @@ export class ProductCategory {
         skip,
         take: limit
       }),
-      prisma.category.count({ where })
+      prisma.productCategory.count({ where })
     ])
 
     return createPagination({ data, page, limit, total })
   }
 
   async find(id: string) {
-    return await prisma.category.findUnique({
+    return await prisma.productCategory.findUnique({
       where: { id }, include: {
         _count: {
           select: {
@@ -76,11 +76,11 @@ export class ProductCategory {
 
     const data = { ...productCategory, name: productCategory.name }
 
-    return await prisma.category.create({ data })
+    return await prisma.productCategory.create({ data })
   }
 
   async update(id: string, productCategory: ProductCategoryProps) {
-    return await prisma.category.update({ where: { id }, data: productCategory })
+    return await prisma.productCategory.update({ where: { id }, data: productCategory })
   }
 
   async delete(id: string) {
@@ -89,6 +89,6 @@ export class ProductCategory {
     if (!category) return { error: 'Category not found' }
     if (category?._count?.products > 0) return { error: 'Can\'t delete category has products' }
 
-    return await prisma.category.delete({ where: { id } })
+    return await prisma.productCategory.delete({ where: { id } })
   }
 }

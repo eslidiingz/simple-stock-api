@@ -69,10 +69,28 @@ export const productController = new Elysia({ prefix: '/products' })
     })
   })
   .put('/:id', async ({ body, params: { id }, productService }) => {
+    let data = { ...body, price: Number(body.price), ...(body?.stock) && { stock: Number(body.stock) } }
+
+    if (body?.image) {
+      const uploaded = await uploadFile('products', body.image, true)
+      data = { ...data, image: uploaded.imagePath, thumbnail: uploaded.thumbPath }
+    }
+
+    const updated = await productService.update(id, data)
+    if (!updated?.id) {
+      if (data?.image)
+        await deleteFile(data.image)
+
+      if (data?.thumbnail)
+        await deleteFile(data.thumbnail)
+
+      return error(422, { success: false, error: created.error })
+    }
+
     return {
       success: true,
       message: 'Product has been updated successfully',
-      product: await productService.update(id, body)
+      product: updated
     }
   }, {
     body: t.Object({
@@ -97,5 +115,18 @@ export const productController = new Elysia({ prefix: '/products' })
   }, {
     params: t.Object({
       id: t.String()
+    })
+  })
+  .get('/code/:code', async ({ params: { code }, productService }) => {
+    const product = await productService.findByCode(code)
+
+    return {
+      success: true,
+      message: 'Product has been find successfully',
+      product
+    }
+  }, {
+    params: t.Object({
+      code: t.String()
     })
   })

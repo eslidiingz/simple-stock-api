@@ -126,6 +126,11 @@ export class Product {
     return await prisma.product.delete({ where: { id } })
   }
 
+  async findByCode(code: string) {
+    console.log("%c%s", "background: #04b8f4; color: #000000", "🚀 ~ Product ~ findByCode ~ code:", code)
+    return await prisma.product.findUnique({ where: { code } })
+  }
+
   private generateCode(): string {
     const characters = '0123456789';
     // const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -138,4 +143,3 @@ export class Product {
   }
 
 }
-
