@@ -1,32 +1,42 @@
-import { Elysia, t } from "elysia";
-import { staticPlugin } from "@elysiajs/static";
+// import 'dotenv/config'
+import { Elysia } from "elysia";
 import { swagger } from '@elysiajs/swagger'
+import { staticPlugin } from "@elysiajs/static";
 import { cors } from '@elysiajs/cors'
-import { productController } from "./products/product.controller";
-import { productCategoryController } from "./product-categories/product-category.controller";
-import { authController } from "./auth/auth.controller";
-import jwt from "@elysiajs/jwt";
+import { jwtPlugin } from "./core/config/jwt";
 import { StatusCodes } from "http-status-codes";
-import { stockMovementController } from "./stock-movements/stock-movement.controller";
+
+import { authController } from "./modules/auth/auth.controller";
+import { privateControllers } from "./modules";
+import { checkPlanMiddleware } from "./middleware/check-plan.middleware";
+import { user } from './user';
+import prisma from "./core/db/prisma";
 
 const app = new Elysia()
-  .use(swagger())
+  .use(swagger({
+    documentation: {
+      components: {
+        securitySchemes: {
+          bearerAuth: {
+            type: 'http',
+            scheme: 'Bearer',
+            bearerFormat: 'JWT'
+          }
+        }
+      }
+    }
+  }))
   .use(cors())
   .use(staticPlugin({
     assets: "public", // Serve files from the 'public' directory
     prefix: "/" // Access files via '/public/<filename>'
   }))
-  .use(jwt({
-    name: 'jwt',
-    // biome-ignore lint/style/noNonNullAssertion: <explanation>
-    secret: process.env.JWT_SECRET!,
-    exp: '1h'
-  }))
+  .use(jwtPlugin)
   .state({
     currentUser: {}
   })
+  .get('/', () => ({ status: "ok", version: "1.0.0" }))
   .group('/api', (app) => {
-
     app
       .use(authController)
       .derive(({ headers }) => {
@@ -42,21 +52,65 @@ const app = new Elysia()
         beforeHandle: async ({ bearer, jwt, error, store }) => {
           const profile = await jwt.verify(bearer || '')
 
-          if (!profile)
+          if (!profile) {
             return error(StatusCodes.UNAUTHORIZED, {
               message: 'Unauthorized'
             })
+          }
 
-          store.currentUser = profile
+          const user = await prisma.user.findFirst({
+            where: { id: profile.id },
+            include: { role: true }
+          })
+
+          if (!user || !user.role) {
+            return error(StatusCodes.FORBIDDEN, {
+              message: 'User or role not found'
+            })
+          }
+
+          const user_type = user?.role?.scope
+          let is_owner = false;
+          let company = null
+
+
+          if (user_type === 'COMPANY') {
+            const company_user = await prisma.companyUser.findFirst({
+              where: { user_id: user.id },
+              include: { company: true }
+            })
+
+            is_owner = company_user?.is_owner || false
+            company = company_user?.company
+          }
+
+          const currentUser = {
+            ...profile,
+            user_type,
+            is_owner,
+            company,
+          }
+
+          store.currentUser = currentUser
         }
       })
-      .use([
-        productCategoryController,
-        productController,
-        stockMovementController,
-      ])
+      // .use(checkPlanMiddleware)
+      .use(privateControllers)
 
     return app
+  })
+  .onError(({ error, code }) => {
+    console.error(`[${code}]`, error)
+
+    if (code === 'NOT_FOUND') {
+      return { status: 404, message: 'Endpoint not found' }
+    }
+
+    return {
+      status: 500,
+      message: 'Something went wrong',
+      detail: error.message,
+    }
   })
 
 

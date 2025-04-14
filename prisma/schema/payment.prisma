@@ -1,0 +1,54 @@
+model PaymentBankAccount {
+  id                String    @id @default(uuid())
+  payment_method_id String
+  bank_id           String
+  account_number    String
+  account_name      String
+  branch            String?
+  is_active         Boolean   @default(true)
+  created_at        DateTime  @default(now())
+  updated_at        DateTime  @updatedAt
+  deleted_at        DateTime?
+
+  payment_method PaymentMethod @relation(fields: [payment_method_id], references: [id])
+  bank           Bank          @relation(fields: [bank_id], references: [id])
+
+  @@unique([bank_id, account_number])
+  @@map("payment_bank_accounts")
+}
+
+model PaymentMethod {
+  id              String    @id @default(uuid())
+  company_id      String
+  fee             Decimal   @default(0)
+  is_active       Boolean   @default(true)
+  is_protected    Boolean   @default(false) // ห้ามลบหรือแก้ไขสำคัญ
+  is_default      Boolean   @default(false) // ระบบจะเลือกอัตโนมัติเวลาสั่งซื้อ
+  note            String?
+  payment_type_id String
+  created_at      DateTime  @default(now())
+  updated_at      DateTime  @updatedAt
+  deleted_at      DateTime?
+
+  company               Company?             @relation(fields: [company_id], references: [id])
+  payment_type          PaymentType?         @relation(fields: [payment_type_id], references: [id])
+  payment_bank_accounts PaymentBankAccount[]
+  orders                Order[]
+
+  @@map("payment_methods")
+}
+
+model PaymentType {
+  id           String    @id @default(uuid())
+  name         String
+  code         String    @unique
+  is_active    Boolean   @default(true)
+  is_protected Boolean   @default(false)
+  created_at   DateTime  @default(now())
+  updated_at   DateTime  @updatedAt
+  deleted_at   DateTime?
+
+  payment_methods PaymentMethod[]
+
+  @@map("payment_types")
+}

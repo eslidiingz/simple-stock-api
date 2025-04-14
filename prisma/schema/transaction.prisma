@@ -1,0 +1,17 @@
+model Transaction {
+  id               String          @id @default(uuid())
+  transaction_type TransactionType
+  amount           Int
+  created_at       DateTime        @default(now())
+  updated_at       DateTime        @updatedAt
+  deleted_at       DateTime?
+
+  @@index([id])
+  @@map("transactions")
+}
+
+enum TransactionType {
+  purchase
+  sale
+  adjustment
+}

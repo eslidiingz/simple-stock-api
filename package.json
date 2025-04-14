@@ -11,14 +11,18 @@
     "@elysiajs/jwt": "^1.2.0",
     "@elysiajs/static": "^1.2.0",
     "@elysiajs/swagger": "^1.2.0",
-    "@prisma/client": "^6.3.1",
+    "@prisma/client": "^6.5.0",
+    "date-fns": "^4.1.0",
     "elysia": "^1.2.12",
     "http-status-codes": "^2.3.0",
     "sharp": "^0.33.5"
   },
   "devDependencies": {
     "bun-types": "latest",
-    "prisma": "^6.3.1"
+    "prisma": "^6.5.0"
   },
-  "module": "src/main.js"
+  "module": "src/main.js",
+  "prisma": {
+    "seed": "bun run prisma/seed/index.ts"
+  }
 }

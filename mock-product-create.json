@@ -1,0 +1,67 @@
+{
+  "items": [
+    {
+      "id": "7116c485-dce4-44eb-9890-9a8c7dc89fdb",
+      "category_id": "6ba8d79e-f051-4857-ab6f-ea4fad1efe2b",
+      "company_id": "a4c9204b-d39f-4942-a13b-c87b4a8b0598",
+      "code": "7302952433732424",
+      "name": "Red dress",
+      "description": null,
+      "image": "/uploads/products/mock/mock-red-dress.webp",
+      "thumbnail": "/uploads/products/mock/mock-red-dress.webp",
+      "price": 199,
+      "stock": 100,
+      "is_active": true,
+      "created_at": "2025-04-08T14:50:07.040Z",
+      "updated_at": "2025-04-08T14:50:07.049Z",
+      "deleted_at": null,
+      "quantity": 1
+    },
+    {
+      "id": "4363c41e-aa25-4be1-a652-e7351170affe",
+      "category_id": "6ba8d79e-f051-4857-ab6f-ea4fad1efe2b",
+      "company_id": "a4c9204b-d39f-4942-a13b-c87b4a8b0598",
+      "code": "2700869430666456",
+      "name": "Pink dress",
+      "description": null,
+      "image": "/uploads/products/mock/mock-red-dress.webp",
+      "thumbnail": "/uploads/products/mock/mock-red-dress.webp",
+      "price": 250,
+      "stock": 80,
+      "is_active": true,
+      "created_at": "2025-04-08T14:50:07.040Z",
+      "updated_at": "2025-04-08T14:50:07.049Z",
+      "deleted_at": null,
+      "quantity": 1
+    }
+  ],
+  "paymentMethod": {
+    "id": "b4b80bbe-0f59-4df1-9fb2-188e9bd2abef",
+    "company_id": "a4c9204b-d39f-4942-a13b-c87b4a8b0598",
+    "fee": 50,
+    "is_active": true,
+    "is_protected": true,
+    "is_default": true,
+    "note": "คิดค่าธรรมเนียมเพิ่ม 50 บาท",
+    "payment_type_id": "eebaff1d-67fa-4469-8db1-cf549a03452c",
+    "created_at": "2025-04-08T14:50:07.034Z",
+    "updated_at": "2025-04-08T14:50:07.034Z",
+    "deleted_at": null,
+    "payment_type": {
+      "id": "eebaff1d-67fa-4469-8db1-cf549a03452c",
+      "name": "เก็บเงินปลายทาง (Cash on Delivery)",
+      "code": "cod",
+      "is_active": true,
+      "is_protected": true,
+      "created_at": "2025-04-08T14:50:06.749Z",
+      "updated_at": "2025-04-08T14:50:06.749Z",
+      "deleted_at": null
+    }
+  },
+  "customer": {
+    "receiver": "nick",
+    "phone": "0811129499"
+  },
+  "shippingAddress": "332/49",
+  "note": "something for reminder"
+}

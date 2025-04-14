@@ -1,0 +1,16 @@
+model Bank {
+  id         String    @id @default(uuid())
+  name_th    String // เช่น ธนาคารกสิกรไทย
+  name_en    String // Kasikorn Bank
+  short_code String    @unique // เช่น KBANK, SCB
+  logo_url   String? // ลิงก์โลโก้
+  is_active  Boolean   @default(true)
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+  deleted_at DateTime?
+
+  bank_accounts PaymentBankAccount[]
+
+  @@index([short_code])
+  @@map("banks")
+}

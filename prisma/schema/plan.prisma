@@ -1,0 +1,18 @@
+model Plan {
+  id             String    @id @default(uuid())
+  code           String    @unique // PRO
+  name           String // Professional
+  description    String?
+  max_categories Int       @default(0)
+  max_users      Int?
+  is_active      Boolean   @default(true)
+  is_default     Boolean   @default(false)
+  is_recommend   Boolean   @default(false)
+  created_at     DateTime  @default(now())
+  updated_at     DateTime  @updatedAt
+  deleted_at     DateTime?
+
+  companies Company[]
+
+  @@map("plans")
+}

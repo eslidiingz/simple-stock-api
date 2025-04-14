@@ -1,0 +1,70 @@
+model Company {
+  id         String    @id @default(uuid())
+  short_code String?
+  name       String
+  is_active  Boolean   @default(true)
+  plan_id    String?
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+  deleted_at DateTime?
+
+  users           CompanyUser[]
+  roles           Role[]
+  categories      CompanyCategory[]
+  plan            Plan?             @relation(fields: [plan_id], references: [id])
+  stock_movement  StockMovement[]
+  payment_methods PaymentMethod[]
+  orders          Order[]
+
+  @@unique([name])
+  @@map("companies")
+}
+
+model CompanyUser {
+  id              String    @id @default(uuid())
+  company_id      String
+  user_id         String
+  company_role_id String?
+  is_owner        Boolean   @default(false)
+  created_at      DateTime  @default(now())
+  updated_at      DateTime  @updatedAt
+  deleted_at      DateTime?
+
+  company Company      @relation(fields: [company_id], references: [id])
+  user    User         @relation(fields: [user_id], references: [id])
+  role    CompanyRole? @relation(fields: [company_role_id], references: [id])
+
+  @@unique([company_id, user_id])
+  @@index([user_id])
+  @@map("company_users")
+}
+
+model CompanyRole {
+  id          String    @id @default(uuid())
+  name        String
+  code        String
+  description String?
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+  deleted_at  DateTime?
+
+  members CompanyUser[]
+
+  @@map("company_roles")
+}
+
+model CompanyCategory {
+  id          String    @id @default(uuid())
+  company_id  String
+  category_id String
+  is_active   Boolean   @default(true)
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+  deleted_at  DateTime?
+
+  company  Company         @relation(fields: [company_id], references: [id])
+  category ProductCategory @relation(fields: [category_id], references: [id])
+
+  @@unique([company_id, category_id])
+  @@map("company_categories")
+}

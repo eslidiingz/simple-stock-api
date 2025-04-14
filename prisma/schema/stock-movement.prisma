@@ -1,0 +1,29 @@
+model StockMovement {
+  id            String            @id @default(uuid())
+  product_id    String
+  company_id    String
+  quantity      Int
+  movement_type StockMovementType
+  reference     String?
+  created_at    DateTime          @default(now())
+  updated_at    DateTime          @updatedAt
+  deleted_at    DateTime?
+
+  product Product @relation(fields: [product_id], references: [id])
+  company Company @relation(fields: [company_id], references: [id])
+
+  @@index([id])
+  @@map("stock_movements")
+}
+
+enum StockMovementType {
+  PURCHASE // ซื้อเข้า
+  SALE // ขายออก
+  STOCK_IN // เติมสต็อก
+  STOCK_OUT // ตัดสต็อก
+  TRANSFER_IN // รับจากคลังอื่น
+  TRANSFER_OUT // ส่งออกไปคลังอื่น
+  ADJUSTMENT // ปรับยอด
+  RETURN_SALE // ลูกค้าคืนสินค้า
+  RETURN_PURCHASE // คืนของให้ supplier
+}

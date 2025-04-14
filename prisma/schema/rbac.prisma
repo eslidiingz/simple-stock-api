@@ -1,0 +1,83 @@
+// Role-based Access Control (RBAC) Schema
+model Role {
+  id          String    @id @default(uuid())
+  name        String
+  code        String
+  description String?
+  scope       RoleScope
+  company_id  String? // null สำหรับ super_admin
+  created_by  String? // ใครเป็นคนสร้าง role นี้ (optional)
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+  deleted_at  DateTime?
+
+  company     Company?         @relation(fields: [company_id], references: [id])
+  users       User[]
+  permissions RolePermission[]
+
+  @@unique([code, scope, company_id])
+  @@map("roles")
+}
+
+enum RoleScope {
+  SUPER_ADMIN
+  COMPANY
+}
+
+model RolePermission {
+  id            String    @id @default(uuid())
+  role_id       String
+  permission_id String
+  created_at    DateTime  @default(now())
+  updated_at    DateTime  @updatedAt
+  deleted_at    DateTime?
+
+  role       Role       @relation(fields: [role_id], references: [id])
+  permission Permission @relation(fields: [permission_id], references: [id])
+
+  @@unique([role_id, permission_id])
+  @@map("role_permissions")
+}
+
+model Permission {
+  id          String    @id @default(uuid())
+  code        String    @unique // e.g. 'view:report', 'manage:campaign'
+  name        String
+  description String?
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+  deleted_at  DateTime?
+
+  roles RolePermission[]
+
+  @@map("permissions")
+}
+
+model SuperAdminRole {
+  id          String    @id @default(uuid())
+  name        String
+  code        String    @unique // เช่น 'finance', 'support', 'system'
+  description String?
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+  deleted_at  DateTime?
+
+  members SuperAdminUser[]
+
+  @@map("super_admin_roles")
+}
+
+model SuperAdminUser {
+  id         String    @id @default(uuid())
+  user_id    String
+  role_id    String
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+  deleted_at DateTime?
+
+  user User           @relation(fields: [user_id], references: [id])
+  role SuperAdminRole @relation(fields: [role_id], references: [id])
+
+  @@unique([user_id, role_id])
+  @@map("super_admin_users")
+}

@@ -1,0 +1,35 @@
+model User {
+  id         String    @id @default(uuid())
+  first_name String?
+  last_name  String?
+  username   String    @unique
+  password   String
+  email      String    @unique
+  is_active  Boolean   @default(true)
+  role_id    String
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+  deleted_at DateTime?
+
+  role Role? @relation(fields: [role_id], references: [id])
+
+  company_member     CompanyUser[]
+  super_admin_member SuperAdminUser[]
+
+  @@index([first_name, username, email])
+  @@map("users")
+}
+
+// model UserRole {
+//   id         String  @id @default(uuid())
+//   user_id    String
+//   role_id    String
+//   company_id String?
+
+//   user    User     @relation(fields: [user_id], references: [id])
+//   role    Role     @relation(fields: [role_id], references: [id])
+//   company Company? @relation(fields: [company_id], references: [id])
+
+//   @@unique([user_id, role_id, company_id])
+//   @@map("user_roles")
+// }

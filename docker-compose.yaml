@@ -13,7 +13,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 1G
+          memory: 512MB
 
   postgres:
     image: postgres:17.4
@@ -29,6 +29,6 @@ services:
     deploy:
       resources:
         limits:
-          memory: 1G
+          memory: 512MB
 
   
