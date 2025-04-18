@@ -1,7 +1,7 @@
 import { Elysia, t } from 'elysia'
 import { OrderService } from './order.service'
 import { ok } from '@/core/utils/response'
-import type { Prisma } from '@prisma/client'
+import { OrderPaymentStatus, type Prisma } from '@prisma/client'
 
 export const orderController = new Elysia({ prefix: '/orders' })
   .decorate('orderService', new OrderService())
@@ -9,6 +9,12 @@ export const orderController = new Elysia({ prefix: '/orders' })
     const orders = await orderService.get({ company_id: currentUser?.company.id })
 
     return ok('Orders fetched successfully', orders.data, orders.pagination)
+  })
+  .get('/:id', async ({ params, orderService, store: { currentUser } }) => {
+
+    const order = await orderService.find(params.id, currentUser?.company.id)
+
+    return ok('Order fetched successfully', order)
   })
   .post('', async ({ body, orderService, store: { currentUser } }) => {
     const productCount = body.items.length
@@ -62,4 +68,24 @@ export const orderController = new Elysia({ prefix: '/orders' })
       shippingAddress: t.String(),
       note: t.Optional(t.String())
     })
+  })
+  .put('/:id', async ({ params: { id }, body: { payment_status }, orderService, store: { currentUser } }) => {
+    const data = { payment_status }
+
+    const updated = await orderService.update(id, data)
+
+    return ok('Order updated successfully', updated)
+  }, {
+    params: t.Object({ id: t.String() }),
+    body: t.Object({
+      payment_status: t.Enum(OrderPaymentStatus)
+    })
+  })
+  .delete('/:id', async ({ params: { id }, orderService }) => {
+
+    const deleted = await orderService.delete(id)
+
+    return ok('Order deleted successfully', deleted)
+  }, {
+    params: t.Object({ id: t.String() })
   })

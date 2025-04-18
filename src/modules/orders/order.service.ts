@@ -1,6 +1,6 @@
 import prisma, { createPagination } from "@/core/db/prisma";
 import { Ordering, type QueryOptions } from "@/types/query.interface";
-import type { Prisma } from "@prisma/client";
+import { Prisma } from '@prisma/client'
 import { OrderDetailService } from "../order_details/order_detail.service";
 import { format } from "date-fns";
 
@@ -67,11 +67,24 @@ export class OrderService {
     return createPagination({ data, page, limit, total })
   }
 
+  async find(id: string, company_id: string) {
+    return await prisma.order.findFirst({
+      where: { id, company_id },
+      include: {
+        details: {
+          include: {
+            product: true
+          }
+        }
+      }
+    })
+  }
+
   async create(data: Prisma.OrderCreateInput) {
     const { items, ...orderToCreate } = data
 
     orderToCreate.code = await this.generateOrderCode(orderToCreate.company_id)
-    console.log(orderToCreate)
+
     const orderCreated = await prisma.order.create({ data: orderToCreate })
 
     if (orderCreated?.id) {
@@ -95,6 +108,22 @@ export class OrderService {
         return orderCreated;
       }
     }
+  }
+
+  async update(id: string, data: Prisma.OrderUpdateInput) {
+    try {
+      return await prisma.order.update({
+        where: { id },
+        data,
+      })
+    } catch (error) {
+      console.log(`Failed to update order: ${error}`)
+      // throw error
+    }
+  }
+
+  async delete(id: string) {
+    return await prisma.order.delete({ where: { id } })
   }
 
   /**

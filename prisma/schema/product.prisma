@@ -16,6 +16,7 @@ model Product {
 
   category        ProductCategory @relation(fields: [category_id], references: [id])
   stock_movements StockMovement[]
+  OrderDetail     OrderDetail[]
 
   @@index([id])
   @@map("products")

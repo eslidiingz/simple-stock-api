@@ -41,6 +41,32 @@ const prisma = rawPrisma.$extends({
           return Number(product.price)
         }
       }
+    },
+    order: {
+      sub_total: {
+        needs: {},
+        compute(order) {
+          return Number(order.sub_total)
+        }
+      },
+      discount: {
+        needs: {},
+        compute(order) {
+          return Number(order.discount)
+        }
+      },
+      shipping: {
+        needs: {},
+        compute(order) {
+          return Number(order.shipping)
+        }
+      },
+      grand_total: {
+        needs: {},
+        compute(order) {
+          return Number(order.grand_total)
+        }
+      }
     }
   },
 })
