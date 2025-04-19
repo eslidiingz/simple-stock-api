@@ -5,8 +5,8 @@ import { OrderPaymentStatus, type Prisma } from '@prisma/client'
 
 export const orderController = new Elysia({ prefix: '/orders' })
   .decorate('orderService', new OrderService())
-  .get('', async ({ orderService, store: { currentUser } }) => {
-    const orders = await orderService.get({ company_id: currentUser?.company.id })
+  .get('', async ({ query, orderService, store: { currentUser } }) => {
+    const orders = await orderService.get({ ...query, company_id: currentUser?.company.id })
 
     return ok('Orders fetched successfully', orders.data, orders.pagination)
   })

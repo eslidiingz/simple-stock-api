@@ -2,6 +2,7 @@ import { t } from "elysia"
 import type { Prisma } from "@prisma/client"
 import { Ordering, type QueryOptions } from "../../types/query.interface"
 import prisma, { createPagination } from "../../core/db/prisma"
+import { StatusCodes } from "http-status-codes"
 
 
 const productCategory = t.Object({
@@ -21,6 +22,18 @@ interface GetCategoriesOptions extends QueryOptions {
 }
 
 export class ProductCategory {
+  async getAll() {
+    return await prisma.productCategory.findMany({
+      where: {
+        is_active: true,
+      },
+      select: {
+        id: true,
+        name: true
+      }
+    })
+  }
+
   async get(query?: Query) {
     const page: number = Number(query?.page) || 1
     const limit: number = Number(query?.limit) || 10
@@ -67,10 +80,10 @@ export class ProductCategory {
   }
 
   async getAllByCompany(companyId: string, options?: GetCategoriesOptions) {
-    const page = options?.page || 1
-    const limit = options?.limit || 10
-    const orderBy = options?.orderBy || 'name'
-    const orderType = options?.orderType || Ordering.ASC
+    const page: number = Number(options?.page) || 1
+    const limit: number = Number(options?.limit) || 10
+    const orderBy: string = options?.orderBy || 'name'
+    const orderType: string = options?.orderType || Ordering.ASC
     const skip = (page - 1) * limit
 
     const whereGetConditions: Prisma.CompanyCategoryWhereInput = {
@@ -89,7 +102,13 @@ export class ProductCategory {
             select: {
               id: true,
               name: true,
-            }
+              _count: {
+                select: {
+                  products: true
+                }
+              }
+
+            },
           },
         },
         orderBy: {
@@ -140,5 +159,31 @@ export class ProductCategory {
     if (category?._count?.products > 0) return { error: 'Can\'t delete category has products' }
 
     return await prisma.productCategory.delete({ where: { id } })
+  }
+
+  async addCategoryToCompany(category_id: string, company_id: string) {
+    try {
+      return await prisma.companyCategory.upsert({
+        where: { company_id_category_id: { company_id, category_id } },
+        update: { is_active: true, deleted_at: null },
+        create: { category_id, company_id }
+      })
+    } catch (error) {
+      return {
+        error: { message: 'Cannot add, Category already added to company', code: StatusCodes.CONFLICT, details: error },
+      }
+    }
+  }
+
+  async findCategoryInCompany(category_id: string, company_id: string) {
+    return await prisma.companyCategory.findUnique({ where: { company_id_category_id: { company_id, category_id } } })
+  }
+
+  async removeCategoryFromCompany(category_id: string, company_id: string) {
+    const category = await this.findCategoryInCompany(category_id, company_id)
+
+    if (!category) return { error: 'Category not found in company', code: StatusCodes.NOT_FOUND }
+
+    return await prisma.companyCategory.delete({ where: { company_id_category_id: { company_id, category_id } } })
   }
 }

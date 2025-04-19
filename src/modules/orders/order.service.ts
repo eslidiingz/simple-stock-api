@@ -17,30 +17,16 @@ export class OrderService {
   }
 
   async get(options?: GetOrderDetailsOptions) {
-    const page = options?.page || 1
-    const limit = options?.limit || 10
-    const orderBy = options?.orderBy || 'created_at'
-    const orderType = options?.orderType || Ordering.DESC
-    const skip = (page - 1) * limit
+    const page: number = Number(options?.page) || 1
+    const limit: number = Number(options?.limit) || 10
+    const orderBy: string = options?.orderBy || 'created_at'
+    const orderType: Ordering = options?.orderType || Ordering.DESC
+    const skip: number = (page - 1) * limit
 
     const whereGetConditions: Prisma.OrderWhereInput = {
-      company_id: options?.company_id || undefined
+      company_id: options?.company_id || undefined,
+      code: options?.code ? { contains: options?.code, mode: 'insensitive' } : undefined
     }
-
-    // return await prisma.order.findMany({
-    //   where: whereGetConditions,
-    //   include: {
-    //     company: true,
-    //     // order_items: {
-    //     //   include: {
-    //     //     product: true
-    //     //   }
-    //     // }
-    //   },
-    //   orderBy: {
-    //     [orderBy]: orderType
-    //   }
-    // })
 
     const [data, total] = await Promise.all([
       prisma.order.findMany({
