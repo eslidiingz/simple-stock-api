@@ -12,6 +12,12 @@ const adjust = t.Object({
 
 type AdjustDto = typeof adjust.static
 
+const increaseStock = t.Array(t.Object({
+  product_id: t.String(),
+  quantity: t.Number(),
+}))
+export type IncreaseStock = typeof increaseStock.static
+
 const decreaseStock = t.Array(t.Object({
   product_id: t.String(),
   quantity: t.Number(),
@@ -103,5 +109,23 @@ export class StockMovement {
     }
   }
 
+  async increase(increaseStock: IncreaseStock, movementType: StockMovementType, company_id: string) {
+    const data: Prisma.StockMovementCreateManyInput[] = increaseStock.map((product) => ({
+      ...product,
+      company_id,
+      movement_type: movementType
+    }))
 
+    const increaseStockCreated = await prisma.stockMovement.createMany({ data })
+
+    if (increaseStockCreated?.count > 0) {
+      const productUpdated = await prisma.$transaction(
+        increaseStock.map(({ product_id, quantity }) => prisma.product.update({
+          where: { id: product_id },
+          data: { stock: { increment: quantity } }
+        }))
+      )
+      return productUpdated
+    }
+  }
 }

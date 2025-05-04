@@ -108,8 +108,15 @@ export class OrderService {
     }
   }
 
-  async delete(id: string) {
-    return await prisma.order.delete({ where: { id } })
+  async delete(id: string, company_id: string) {
+    const order = await this.find(id, company_id)
+    const deleted = await prisma.order.delete({ where: { id } })
+
+    if (deleted?.id) {
+      for (const detail of order.details) {
+        await this.#orderDetailService.delete(detail.id, company_id)
+      }
+    }
   }
 
   /**

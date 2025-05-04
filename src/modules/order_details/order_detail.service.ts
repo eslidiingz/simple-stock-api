@@ -1,6 +1,6 @@
 import prisma, { createPagination } from "@/core/db/prisma";
 import { Ordering, type QueryOptions } from "@/types/query.interface";
-import type { Prisma } from "@prisma/client";
+import { StockMovementType, type Prisma } from "@prisma/client";
 import { DecreaseStock, StockMovement } from "../stock-movements/stock-movement.service";
 
 interface GetOrdersOptions extends QueryOptions {
@@ -88,5 +88,15 @@ export class OrderDetailService {
       console.log(`Failed to create order detail: ${error}`)
       return error
     }
+  }
+
+  async delete(id: string, company_id: string) {
+    const deleted = await prisma.orderDetail.delete({ where: { id } })
+
+    if (deleted?.id) {
+      await this.#stockMovementService.increase([{ product_id: deleted.product_id, quantity: deleted.quantity }], StockMovementType.ADJUSTMENT, company_id)
+    }
+
+    return deleted
   }
 }

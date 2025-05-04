@@ -81,9 +81,9 @@ export const orderController = new Elysia({ prefix: '/orders' })
       payment_status: t.Enum(OrderPaymentStatus)
     })
   })
-  .delete('/:id', async ({ params: { id }, orderService }) => {
+  .delete('/:id', async ({ params: { id }, orderService, store: { currentUser } }) => {
 
-    const deleted = await orderService.delete(id)
+    const deleted = await orderService.delete(id, currentUser?.company.id)
 
     return ok('Order deleted successfully', deleted)
   }, {
