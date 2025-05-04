@@ -69,8 +69,8 @@ export const orderController = new Elysia({ prefix: '/orders' })
       note: t.Optional(t.String())
     })
   })
-  .put('/:id', async ({ params: { id }, body: { payment_status, status }, orderService, store: { currentUser } }) => {
-    const data = { payment_status, status }
+  .put('/:id', async ({ params: { id }, body: { payment_status, status, tracking_code }, orderService, store: { currentUser } }) => {
+    const data = { payment_status, status, tracking_code }
 
     const updated = await orderService.update(id, data)
 
@@ -79,7 +79,8 @@ export const orderController = new Elysia({ prefix: '/orders' })
     params: t.Object({ id: t.String() }),
     body: t.Object({
       payment_status: t.Enum(OrderPaymentStatus),
-      status: t.Enum(OrderStatus)
+      status: t.Enum(OrderStatus),
+      tracking_code: t.Nullable(t.String()),
     })
   })
   .delete('/:id', async ({ params: { id }, orderService, store: { currentUser } }) => {
