@@ -1,7 +1,7 @@
 import { Elysia, t } from 'elysia'
 import { OrderService } from './order.service'
 import { ok } from '@/core/utils/response'
-import { OrderPaymentStatus, type Prisma } from '@prisma/client'
+import { OrderPaymentStatus, OrderStatus, type Prisma } from '@prisma/client'
 
 export const orderController = new Elysia({ prefix: '/orders' })
   .decorate('orderService', new OrderService())
@@ -69,8 +69,8 @@ export const orderController = new Elysia({ prefix: '/orders' })
       note: t.Optional(t.String())
     })
   })
-  .put('/:id', async ({ params: { id }, body: { payment_status }, orderService, store: { currentUser } }) => {
-    const data = { payment_status }
+  .put('/:id', async ({ params: { id }, body: { payment_status, status }, orderService, store: { currentUser } }) => {
+    const data = { payment_status, status }
 
     const updated = await orderService.update(id, data)
 
@@ -78,7 +78,8 @@ export const orderController = new Elysia({ prefix: '/orders' })
   }, {
     params: t.Object({ id: t.String() }),
     body: t.Object({
-      payment_status: t.Enum(OrderPaymentStatus)
+      payment_status: t.Enum(OrderPaymentStatus),
+      status: t.Enum(OrderStatus)
     })
   })
   .delete('/:id', async ({ params: { id }, orderService, store: { currentUser } }) => {
