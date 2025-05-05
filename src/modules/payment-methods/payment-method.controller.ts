@@ -52,6 +52,19 @@ export const paymentMethodController = new Elysia({ prefix: '/payment-methods' }
     })
   })
 
+  .put('', async ({ body, store, paymentMethodService }) => {
+    const companyId = store.currentUser?.company.id
+    const updated = await paymentMethodService.updatePaymentMethods(body, companyId)
+
+    return ok('Payment methods updated successfully', body)
+  }, {
+    body: t.Array(t.Object({
+      id: t.String(),
+      fee: t.Number(),
+      note: t.Nullable(t.String()),
+    }))
+  })
+
   // DELETE /payment-methods/:id
   .delete('/:id', async ({ params, store, paymentMethodService }) => {
     const userId = store.currentUser?.id

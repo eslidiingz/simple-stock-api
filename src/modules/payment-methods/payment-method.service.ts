@@ -1,6 +1,16 @@
 // src/modules/payment/payment-method.service.ts
+
+import { t } from "elysia"
 import prisma from '@/core/db/prisma'
 import type { PrismaClient, Prisma } from '@prisma/client'
+
+const updatePaymentMethodType = t.Object({
+  id: t.String(),
+  fee: t.Number(),
+  note: t.Nullable(t.String()),
+})
+
+type UpdatePaymentMethod = typeof updatePaymentMethodType.static
 
 export class PaymentMethodService {
 
@@ -79,5 +89,14 @@ export class PaymentMethodService {
     } catch (error) {
       console.log(error)
     }
+  }
+
+  async updatePaymentMethods(updatePaymentMethods: UpdatePaymentMethod[], company_id: string) {
+    return await prisma.$transaction(
+      updatePaymentMethods.map(({ id, fee, note }) => prisma.paymentMethod.update({
+        where: { id, company_id },
+        data: { fee, note },
+      }))
+    )
   }
 }
